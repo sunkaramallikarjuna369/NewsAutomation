@@ -22,57 +22,89 @@ A full-stack web application that automatically aggregates news, verifies facts,
 - Real-time progress tracking
 - Dark mode UI
 
-## Quick Start
+## Run Locally (Recommended for Development)
 
 ### Prerequisites
 
 - Python 3.11+
 - Node.js 18+
-- [uv](https://github.com/astral-sh/uv) (Python package manager)
-- FFmpeg (`sudo apt install ffmpeg`)
+- FFmpeg (`sudo apt install ffmpeg` on Ubuntu/Debian, `brew install ffmpeg` on macOS)
 
-### Backend Setup
+### Option A: Using `uv` (fastest)
 
 ```bash
+# Install uv if not already installed
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# --- Backend ---
 cd backend
-
-# Create virtual environment and install dependencies
-uv venv .venv
-source .venv/bin/activate
-uv pip install -e .
-
-# Copy and configure environment
 cp .env.example .env
-# Edit .env with your API keys (Groq key required for AI features)
+# Edit .env with your API keys (Groq key recommended for AI features)
 
-# Run the server
+uv venv .venv
+source .venv/bin/activate        # Linux/macOS
+# .venv\Scripts\activate         # Windows
+
+uv pip install -e .
+uvicorn app.main:app --reload --port 8000
+# Backend running at http://localhost:8000
+# Swagger docs at http://localhost:8000/docs
+```
+
+```bash
+# --- Frontend (in a new terminal) ---
+cd frontend
+npm install
+npm run dev
+# Frontend running at http://localhost:5173
+```
+
+### Option B: Using `pip` + `requirements.txt`
+
+```bash
+# --- Backend ---
+cd backend
+cp .env.example .env
+# Edit .env with your API keys
+
+python -m venv .venv
+source .venv/bin/activate        # Linux/macOS
+# .venv\Scripts\activate         # Windows
+
+pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-### Frontend Setup
-
 ```bash
+# --- Frontend (in a new terminal) ---
 cd frontend
-
-# Install dependencies
 npm install
-
-# Run dev server
 npm run dev
 ```
 
-The app will be available at `http://localhost:5173` with the API at `http://localhost:8000`.
-
-### Docker Setup
+### Option C: Docker Compose (production-like)
 
 ```bash
 # Copy and configure environment
 cp backend/.env.example backend/.env
 # Edit backend/.env with your API keys
 
-# Start all services
+# Start all services (backend + frontend + Redis)
 docker compose up --build
+
+# Frontend: http://localhost:5173
+# Backend:  http://localhost:8000
+# Redis:    localhost:6379
 ```
+
+### Verify It Works
+
+1. Open `http://localhost:5173` in your browser
+2. Register a new account
+3. Enter a news topic on the dashboard (e.g. "India Budget 2026")
+4. RSS feeds work without any API keys — you can test aggregation immediately
+5. For AI script generation, add your Groq API key in Settings (free at https://console.groq.com)
+6. Check `http://localhost:8000/docs` for the full Swagger API docs
 
 ## API Keys Setup
 

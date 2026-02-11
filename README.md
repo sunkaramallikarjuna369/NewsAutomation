@@ -22,89 +22,164 @@ A full-stack web application that automatically aggregates news, verifies facts,
 - Real-time progress tracking
 - Dark mode UI
 
-## Run Locally (Recommended for Development)
+---
 
-### Prerequisites
+## How to Execute
 
-- Python 3.11+
-- Node.js 18+
-- FFmpeg (`sudo apt install ffmpeg` on Ubuntu/Debian, `brew install ffmpeg` on macOS)
+### Prerequisites (for all methods)
 
-### Option A: Using `uv` (fastest)
+- FFmpeg: `sudo apt install ffmpeg` (Ubuntu/Debian) or `brew install ffmpeg` (macOS)
+
+---
+
+### WITHOUT DOCKER (Local Execution)
+
+No Docker needed. You only need Python 3.11+ and Node.js 18+.
+
+#### Step 1: Clone the repository
 
 ```bash
-# Install uv if not already installed
+git clone https://github.com/sunkaramallikarjuna369/NewsAutomation.git
+cd NewsAutomation
+```
+
+#### Step 2: Configure environment variables
+
+```bash
+cp backend/.env.example backend/.env
+# Open backend/.env in any editor and add your API keys
+# At minimum, add GROQ_API_KEY for AI features (free at https://console.groq.com)
+# RSS feeds work without any API keys
+```
+
+#### Step 3: Start the Backend (choose one method)
+
+**Method 1: Using `pip` + `requirements.txt` (simplest, no extra tools)**
+
+```bash
+cd backend
+
+# Create virtual environment
+python -m venv .venv
+
+# Activate it
+source .venv/bin/activate        # Linux/macOS
+# .venv\Scripts\activate         # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Start the backend server
+uvicorn app.main:app --reload --port 8000
+```
+
+**Method 2: Using `uv` (faster installation)**
+
+```bash
+# Install uv first (one-time)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# --- Backend ---
 cd backend
-cp .env.example .env
-# Edit .env with your API keys (Groq key recommended for AI features)
 
+# Create virtual environment and install
 uv venv .venv
 source .venv/bin/activate        # Linux/macOS
 # .venv\Scripts\activate         # Windows
-
 uv pip install -e .
-uvicorn app.main:app --reload --port 8000
-# Backend running at http://localhost:8000
-# Swagger docs at http://localhost:8000/docs
-```
 
-```bash
-# --- Frontend (in a new terminal) ---
-cd frontend
-npm install
-npm run dev
-# Frontend running at http://localhost:5173
-```
-
-### Option B: Using `pip` + `requirements.txt`
-
-```bash
-# --- Backend ---
-cd backend
-cp .env.example .env
-# Edit .env with your API keys
-
-python -m venv .venv
-source .venv/bin/activate        # Linux/macOS
-# .venv\Scripts\activate         # Windows
-
-pip install -r requirements.txt
+# Start the backend server
 uvicorn app.main:app --reload --port 8000
 ```
 
+Backend will be running at:
+- API: http://localhost:8000
+- Swagger Docs: http://localhost:8000/docs
+
+#### Step 4: Start the Frontend (open a new terminal)
+
 ```bash
-# --- Frontend (in a new terminal) ---
 cd frontend
+
+# Install dependencies
 npm install
+
+# Start the frontend dev server
 npm run dev
 ```
 
-### Option C: Docker Compose (production-like)
+Frontend will be running at: http://localhost:5173
 
-```bash
-# Copy and configure environment
-cp backend/.env.example backend/.env
-# Edit backend/.env with your API keys
+#### Step 5: Open the app
 
-# Start all services (backend + frontend + Redis)
-docker compose up --build
-
-# Frontend: http://localhost:5173
-# Backend:  http://localhost:8000
-# Redis:    localhost:6379
-```
-
-### Verify It Works
-
-1. Open `http://localhost:5173` in your browser
+1. Open http://localhost:5173 in your browser
 2. Register a new account
 3. Enter a news topic on the dashboard (e.g. "India Budget 2026")
-4. RSS feeds work without any API keys — you can test aggregation immediately
+4. News aggregation works immediately (RSS feeds are free, no API key needed)
+5. For AI script generation, go to Settings and add your Groq API key
+6. Backend API docs are at http://localhost:8000/docs
+
+#### To stop the servers
+
+Press `Ctrl+C` in each terminal (backend and frontend).
+
+---
+
+### WITH DOCKER (Production-like)
+
+Requires Docker and Docker Compose installed.
+
+#### Step 1: Clone the repository
+
+```bash
+git clone https://github.com/sunkaramallikarjuna369/NewsAutomation.git
+cd NewsAutomation
+```
+
+#### Step 2: Configure environment variables
+
+```bash
+cp backend/.env.example backend/.env
+# Open backend/.env in any editor and add your API keys
+```
+
+#### Step 3: Build and start all services
+
+```bash
+docker compose up --build
+```
+
+This starts 3 containers:
+- **Backend** (FastAPI): http://localhost:8000
+- **Frontend** (React + Nginx): http://localhost:5173
+- **Redis**: localhost:6379
+
+#### Step 4: Open the app
+
+1. Open http://localhost:5173 in your browser
+2. Register and start using the platform
+
+#### To stop Docker
+
+```bash
+docker compose down
+```
+
+#### To rebuild after code changes
+
+```bash
+docker compose up --build
+```
+
+---
+
+### Verify It Works (both methods)
+
+1. Open http://localhost:5173 in your browser
+2. Register a new account (any email/password)
+3. Enter a news topic on the dashboard (e.g. "India Budget 2026")
+4. RSS feeds work without any API keys - you can test news aggregation immediately
 5. For AI script generation, add your Groq API key in Settings (free at https://console.groq.com)
-6. Check `http://localhost:8000/docs` for the full Swagger API docs
+6. Check http://localhost:8000/docs for the full Swagger API documentation
 
 ## API Keys Setup
 

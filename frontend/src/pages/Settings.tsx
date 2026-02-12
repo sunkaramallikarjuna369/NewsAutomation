@@ -102,6 +102,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [ytConnecting, setYtConnecting] = useState(false);
+  const [showYtHelp, setShowYtHelp] = useState(false);
 
   const [formData, setFormData] = useState({
     groq_api_key: "",
@@ -269,10 +270,110 @@ export default function Settings() {
       </div>
 
       <div className="bg-gray-900 rounded-xl border border-gray-800 p-6">
-        <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <Youtube className="h-5 w-5 text-red-500" />
-          YouTube Connection
-        </h2>
+        <div className="flex items-center gap-2 mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <Youtube className="h-5 w-5 text-red-500" />
+            YouTube Connection
+          </h2>
+          <button
+            type="button"
+            onClick={() => setShowYtHelp(!showYtHelp)}
+            className="text-cyan-400 hover:text-cyan-300 transition-colors"
+            title="How to set up YouTube connection"
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
+        </div>
+
+        {showYtHelp && (
+          <div className="mb-4 p-4 bg-gray-800 border border-cyan-500/30 rounded-lg text-sm">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-medium text-cyan-400">How to set up YouTube API & connect your channel</span>
+              <button
+                type="button"
+                onClick={() => setShowYtHelp(false)}
+                className="text-gray-400 hover:text-white"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <p className="font-medium text-white mb-1">Step 1: Create a Google Cloud Project</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
+                  <li>Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">console.cloud.google.com</a></li>
+                  <li>Sign in with your Google account</li>
+                  <li>Click "Select a project" at the top, then "New Project"</li>
+                  <li>Name it (e.g. "NewsAI Studio") and click "Create"</li>
+                </ol>
+              </div>
+
+              <div>
+                <p className="font-medium text-white mb-1">Step 2: Enable YouTube Data API v3</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
+                  <li>In Google Cloud Console, go to "APIs & Services" &gt; "Library"</li>
+                  <li>Search for "YouTube Data API v3"</li>
+                  <li>Click on it and press "Enable"</li>
+                </ol>
+              </div>
+
+              <div>
+                <p className="font-medium text-white mb-1">Step 3: Create OAuth 2.0 Credentials</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
+                  <li>Go to "APIs & Services" &gt; "Credentials"</li>
+                  <li>Click "+ Create Credentials" &gt; "OAuth client ID"</li>
+                  <li>If prompted, configure the OAuth consent screen first:
+                    <ul className="list-disc list-inside ml-4 text-gray-400">
+                      <li>Choose "External" user type</li>
+                      <li>Fill in app name, support email, and developer email</li>
+                      <li>Add scope: "youtube.upload"</li>
+                      <li>Add your email as a test user</li>
+                    </ul>
+                  </li>
+                  <li>Back in Credentials, select "Web application" as type</li>
+                  <li>Add authorized redirect URI: <code className="bg-gray-700 px-1 rounded">http://localhost:8000/api/youtube/callback</code></li>
+                  <li>Click "Create"</li>
+                </ol>
+              </div>
+
+              <div>
+                <p className="font-medium text-white mb-1">Step 4: Copy your credentials</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
+                  <li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong> shown</li>
+                  <li>Add them to your <code className="bg-gray-700 px-1 rounded">backend/.env</code> file:
+                    <pre className="bg-gray-700 p-2 rounded mt-1 text-xs overflow-x-auto">YOUTUBE_CLIENT_ID=your-client-id-here{"\n"}YOUTUBE_CLIENT_SECRET=your-client-secret-here{"\n"}YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback</pre>
+                  </li>
+                  <li>Restart your backend server</li>
+                </ol>
+              </div>
+
+              <div>
+                <p className="font-medium text-white mb-1">Step 5: Connect from this page</p>
+                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
+                  <li>Click the "Connect YouTube" button below</li>
+                  <li>Sign in with the Google account that owns your YouTube channel</li>
+                  <li>Grant permission to upload videos</li>
+                  <li>You'll be redirected back and the status will show "Connected"</li>
+                </ol>
+              </div>
+
+              <div className="mt-2 flex items-center justify-between pt-2 border-t border-gray-700">
+                <a
+                  href="https://console.cloud.google.com/apis/library/youtube.googleapis.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:underline flex items-center gap-1 text-xs"
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Open Google Cloud Console
+                </a>
+                <span className="text-xs text-gray-500">Free: 10,000 quota units/day</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {settings?.has_youtube_connected ? (
           <div className="flex items-center gap-2 text-green-400">
             <CheckCircle2 className="h-5 w-5" />

@@ -12,7 +12,88 @@ import {
   Globe,
   Palette,
   Clock,
+  HelpCircle,
+  X,
 } from "lucide-react";
+
+const API_KEY_HELP: Record<string, { title: string; steps: string[]; url: string; free: string }> = {
+  groq: {
+    title: "How to get your Groq API Key",
+    steps: [
+      "Go to console.groq.com",
+      "Sign up with Google or email (free)",
+      "Click 'API Keys' in the left sidebar",
+      "Click 'Create API Key'",
+      "Copy the key (starts with gsk_...)",
+      "Paste it in the field below",
+    ],
+    url: "https://console.groq.com",
+    free: "Free tier: 14,400 requests/day, 6,000 tokens/min",
+  },
+  newsapi: {
+    title: "How to get your NewsAPI Key",
+    steps: [
+      "Go to newsapi.org/register",
+      "Sign up with your email",
+      "Your API key appears on the dashboard immediately",
+      "Copy the key",
+      "Paste it in the field below",
+    ],
+    url: "https://newsapi.org/register",
+    free: "Free tier: 100 requests/day",
+  },
+  gnews: {
+    title: "How to get your GNews API Key",
+    steps: [
+      "Go to gnews.io/register",
+      "Sign up with your email",
+      "Go to Dashboard > API Key",
+      "Copy the key",
+      "Paste it in the field below",
+    ],
+    url: "https://gnews.io/register",
+    free: "Free tier: 100 requests/day",
+  },
+  pexels: {
+    title: "How to get your Pexels API Key",
+    steps: [
+      "Go to pexels.com/api",
+      "Click 'Get Started' and create an account",
+      "After login, go to pexels.com/api/new",
+      "Fill in app name (e.g. 'NewsAI Studio') and description",
+      "Your API key will be displayed",
+      "Copy and paste it in the field below",
+    ],
+    url: "https://www.pexels.com/api/",
+    free: "Free tier: 200 requests/hour, 20,000/month",
+  },
+  elevenlabs: {
+    title: "How to get your ElevenLabs API Key",
+    steps: [
+      "Go to elevenlabs.io",
+      "Sign up for an account",
+      "Click your profile icon (bottom-left)",
+      "Go to 'API Keys'",
+      "Copy the API key",
+      "Paste it in the field below",
+    ],
+    url: "https://elevenlabs.io",
+    free: "Free tier: ~10,000 characters/month. Paid from $5/month.",
+  },
+  did: {
+    title: "How to get your D-ID API Key",
+    steps: [
+      "Go to d-id.com",
+      "Sign up for an account",
+      "Go to Settings > API Keys",
+      "Generate a new API key",
+      "Copy the key",
+      "Paste it in the field below",
+    ],
+    url: "https://www.d-id.com",
+    free: "Free tier: 20 videos free, then paid from $5.90/month",
+  },
+};
 
 export default function Settings() {
   const [searchParams] = useSearchParams();
@@ -132,6 +213,7 @@ export default function Settings() {
         </h2>
         <p className="text-sm text-gray-400 mb-4">
           Add your API keys to enable AI-powered features. Keys are stored securely per user.
+          Click the <HelpCircle className="inline h-3.5 w-3.5 text-cyan-400" /> icon for step-by-step instructions.
         </p>
 
         <div className="space-y-4">
@@ -141,6 +223,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, groq_api_key: v })}
             configured={settings?.has_groq_api_key}
             hint="Free tier: 14,400 req/day. Get key at console.groq.com"
+            helpKey="groq"
           />
           <ApiKeyInput
             label="NewsAPI Key"
@@ -148,6 +231,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, newsapi_key: v })}
             configured={settings?.has_newsapi_key}
             hint="Optional. 100 req/day free. RSS feeds work without this."
+            helpKey="newsapi"
           />
           <ApiKeyInput
             label="GNews API Key"
@@ -155,6 +239,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, gnews_api_key: v })}
             configured={settings?.has_gnews_api_key}
             hint="Optional backup source. 100 req/day free."
+            helpKey="gnews"
           />
           <ApiKeyInput
             label="Pexels API Key"
@@ -162,6 +247,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, pexels_api_key: v })}
             configured={settings?.has_pexels_api_key}
             hint="Optional. For stock images in videos."
+            helpKey="pexels"
           />
           <ApiKeyInput
             label="ElevenLabs API Key (Premium Voice)"
@@ -169,6 +255,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, elevenlabs_api_key: v })}
             configured={settings?.has_elevenlabs_api_key}
             hint="Optional premium voice cloning. Edge TTS is free by default."
+            helpKey="elevenlabs"
           />
           <ApiKeyInput
             label="D-ID API Key (Cloud Avatar)"
@@ -176,6 +263,7 @@ export default function Settings() {
             onChange={(v) => setFormData({ ...formData, did_api_key: v })}
             configured={settings?.has_did_api_key}
             hint="Optional cloud avatar. SadTalker (local GPU) is free by default."
+            helpKey="did"
           />
         </div>
       </div>
@@ -282,28 +370,78 @@ function ApiKeyInput({
   onChange,
   configured,
   hint,
+  helpKey,
 }: {
   label: string;
   value: string;
   onChange: (v: string) => void;
   configured?: boolean;
   hint?: string;
+  helpKey?: string;
 }) {
+  const [showHelp, setShowHelp] = useState(false);
+  const help = helpKey ? API_KEY_HELP[helpKey] : null;
+
   return (
     <div>
       <div className="flex items-center justify-between mb-1">
-        <label className="text-sm font-medium text-gray-300">{label}</label>
+        <div className="flex items-center gap-1.5">
+          <label className="text-sm font-medium text-gray-300">{label}</label>
+          {help && (
+            <button
+              type="button"
+              onClick={() => setShowHelp(!showHelp)}
+              className="text-cyan-400 hover:text-cyan-300 transition-colors"
+              title="How to get this key"
+            >
+              <HelpCircle className="h-4 w-4" />
+            </button>
+          )}
+        </div>
         {configured && (
           <span className="text-xs text-green-400 flex items-center gap-1">
             <CheckCircle2 className="h-3 w-3" /> Configured
           </span>
         )}
       </div>
+
+      {showHelp && help && (
+        <div className="mb-2 p-3 bg-gray-800 border border-cyan-500/30 rounded-lg text-sm">
+          <div className="flex items-center justify-between mb-2">
+            <span className="font-medium text-cyan-400">{help.title}</span>
+            <button
+              type="button"
+              onClick={() => setShowHelp(false)}
+              className="text-gray-400 hover:text-white"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+          <ol className="list-decimal list-inside space-y-1 text-gray-300">
+            {help.steps.map((step, i) => (
+              <li key={i}>{step}</li>
+            ))}
+          </ol>
+          <div className="mt-2 flex items-center justify-between">
+            <a
+              href={help.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cyan-400 hover:underline flex items-center gap-1 text-xs"
+            >
+              <ExternalLink className="h-3 w-3" />
+              Open {help.url.replace("https://", "").replace("http://", "")}
+            </a>
+            <span className="text-xs text-gray-500">{help.free}</span>
+          </div>
+        </div>
+      )}
+
       <input
         type="password"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder={configured ? "••••••••  (already set, enter new to update)" : "Enter API key"}
+        placeholder={configured ? "............  (already set, enter new to update)" : "Enter API key"}
         className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-cyan-500"
       />
       {hint && <p className="text-xs text-gray-500 mt-1">{hint}</p>}

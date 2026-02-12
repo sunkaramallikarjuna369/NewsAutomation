@@ -30,19 +30,55 @@ A full-stack web application that automatically aggregates news, verifies facts,
 
 Install these before proceeding:
 
-| Tool | Install Command | Verify |
-|------|----------------|--------|
-| **Python 3.11+** | [python.org/downloads](https://www.python.org/downloads/) or `sudo apt install python3 python3-pip python3-venv` | `python3 --version` |
-| **Node.js 18+** | [nodejs.org](https://nodejs.org/) or `sudo apt install nodejs npm` | `node --version` |
-| **FFmpeg** | `sudo apt install ffmpeg` (Ubuntu/Debian) or `brew install ffmpeg` (macOS) | `ffmpeg -version` |
-| **Git** | `sudo apt install git` | `git --version` |
+#### Python 3.11+
 
-**Optional (only if using Docker):**
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | Download from https://www.python.org/downloads/ > Run installer > **Check "Add Python to PATH"** > Click Install | Open CMD: `python --version` |
+| **Ubuntu/Debian** | `sudo apt update && sudo apt install python3 python3-pip python3-venv` | `python3 --version` |
+| **macOS** | `brew install python` or download from https://www.python.org/downloads/ | `python3 --version` |
 
-| Tool | Install Command | Verify |
-|------|----------------|--------|
-| **Docker** | [docs.docker.com/get-docker](https://docs.docker.com/get-docker/) | `docker --version` |
-| **Docker Compose** | Included with Docker Desktop, or `sudo apt install docker-compose-plugin` | `docker compose version` |
+#### Node.js 18+
+
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | Download LTS from https://nodejs.org/ > Run installer > Follow prompts | Open CMD: `node --version` and `npm --version` |
+| **Ubuntu/Debian** | `sudo apt update && sudo apt install nodejs npm` | `node --version` |
+| **macOS** | `brew install node` or download from https://nodejs.org/ | `node --version` |
+
+#### FFmpeg (required for video generation)
+
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | 1. Download from https://www.gyan.dev/ffmpeg/builds/ (get `ffmpeg-release-essentials.zip`) 2. Extract to `C:\ffmpeg` 3. Add `C:\ffmpeg\bin` to System PATH: Settings > System > About > Advanced system settings > Environment Variables > Edit PATH > Add `C:\ffmpeg\bin` 4. Restart CMD | Open CMD: `ffmpeg -version` |
+| **Ubuntu/Debian** | `sudo apt update && sudo apt install ffmpeg` | `ffmpeg -version` |
+| **macOS** | `brew install ffmpeg` | `ffmpeg -version` |
+
+#### Git
+
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | Download from https://git-scm.com/download/win > Run installer > Use defaults | Open CMD: `git --version` |
+| **Ubuntu/Debian** | `sudo apt install git` | `git --version` |
+| **macOS** | `brew install git` or comes pre-installed with Xcode tools | `git --version` |
+
+#### Redis (optional - for caching/background jobs)
+
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | **Option 1 (WSL - Recommended):** 1. Open PowerShell as Admin: `wsl --install` 2. Restart PC 3. Open Ubuntu from Start Menu 4. Run: `sudo apt update && sudo apt install redis-server` 5. Start: `sudo service redis-server start` **Option 2 (Memurai - Native Windows):** 1. Download from https://www.memurai.com/get-memurai (free developer edition) 2. Run installer 3. Memurai runs as a Windows service automatically **Option 3 (Docker):** `docker run -d -p 6379:6379 redis:7-alpine` | Open CMD: `redis-cli ping` should return `PONG` |
+| **Ubuntu/Debian** | `sudo apt update && sudo apt install redis-server` then `sudo systemctl start redis-server` and `sudo systemctl enable redis-server` | `redis-cli ping` returns `PONG` |
+| **macOS** | `brew install redis` then `brew services start redis` | `redis-cli ping` returns `PONG` |
+
+> **Note**: Redis is optional. The app works fine without it. It's only used for caching and background job queues. If you skip Redis, just leave `REDIS_URL` empty in `.env`.
+
+#### Docker & Docker Compose (only if using Docker method)
+
+| OS | How to Install | Verify |
+|----|---------------|--------|
+| **Windows** | Download Docker Desktop from https://www.docker.com/products/docker-desktop/ > Run installer > Restart PC > Open Docker Desktop | Open CMD: `docker --version` and `docker compose version` |
+| **Ubuntu/Debian** | Follow https://docs.docker.com/engine/install/ubuntu/ or: `sudo apt update && sudo apt install docker.io docker-compose-plugin` then `sudo usermod -aG docker $USER` (logout and login again) | `docker --version` and `docker compose version` |
+| **macOS** | Download Docker Desktop from https://www.docker.com/products/docker-desktop/ or `brew install --cask docker` | `docker --version` and `docker compose version` |
 
 ---
 
@@ -59,49 +95,61 @@ cd NewsAutomation
 
 #### Step 2: Configure environment variables
 
+**Linux/macOS:**
 ```bash
 cp backend/.env.example backend/.env
-# Open backend/.env in any editor and add your API keys
-# At minimum, add GROQ_API_KEY for AI features (free at https://console.groq.com)
-# RSS feeds work without any API keys
+nano backend/.env    # or use any editor
 ```
+
+**Windows (CMD):**
+```cmd
+copy backend\.env.example backend\.env
+notepad backend\.env
+```
+
+Edit the `.env` file and add your API keys. At minimum, add `GROQ_API_KEY` for AI features (free at https://console.groq.com). RSS feeds work without any API keys. See the [API Keys Setup section](#api-keys-setup-4w--1h-guide) below for how to get each key.
 
 #### Step 3: Start the Backend (choose one method)
 
 **Method 1: Using `pip` + `requirements.txt` (simplest, no extra tools)**
 
+Linux/macOS:
 ```bash
 cd backend
-
-# Create virtual environment
-python -m venv .venv
-
-# Activate it
-source .venv/bin/activate        # Linux/macOS
-# .venv\Scripts\activate         # Windows
-
-# Install dependencies
+python3 -m venv .venv
+source .venv/bin/activate
 pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
 
-# Start the backend server
+Windows (CMD):
+```cmd
+cd backend
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
 **Method 2: Using `uv` (faster installation)**
 
+Linux/macOS:
 ```bash
-# Install uv first (one-time)
 curl -LsSf https://astral.sh/uv/install.sh | sh
-
 cd backend
-
-# Create virtual environment and install
 uv venv .venv
-source .venv/bin/activate        # Linux/macOS
-# .venv\Scripts\activate         # Windows
+source .venv/bin/activate
 uv pip install -e .
+uvicorn app.main:app --reload --port 8000
+```
 
-# Start the backend server
+Windows (PowerShell):
+```powershell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+cd backend
+uv venv .venv
+.venv\Scripts\activate
+uv pip install -e .
 uvicorn app.main:app --reload --port 8000
 ```
 
@@ -195,168 +243,123 @@ docker compose up --build
 5. For AI script generation, add your Groq API key in Settings (free at https://console.groq.com)
 6. Check http://localhost:8000/docs for the full Swagger API documentation
 
-## API Keys Setup (Step-by-Step)
+## API Keys Setup (4W + 1H Guide)
 
-You can configure API keys either in `backend/.env` file OR from the Settings page in the app after logging in.
+You can configure API keys in `backend/.env` file OR from the Settings page in the app after logging in.
 
 **Default free path**: The app works without any API keys! RSS feeds (unlimited) + Edge TTS (free voices) + MoviePy (free video) all work out of the box. API keys unlock additional features.
 
 ---
 
-### 1. Groq API Key (Recommended - FREE)
+### 1. GROQ_API_KEY (Recommended - FREE)
 
-**What it does**: Powers AI script generation and fact verification using Llama 3.1 70B.
+| Question | Answer |
+|----------|--------|
+| **What** | API key for Groq cloud inference platform. Gives access to Llama 3.1 70B large language model. |
+| **Why** | Powers the core AI features: generates news scripts from verified facts, runs fact-verification across sources, creates video titles/descriptions/tags. Without it, the app returns template/placeholder scripts. |
+| **When** | Needed every time you click "Generate Script" or "Verify Facts" in the app. Used on every video creation workflow. |
+| **Where** | Get it from https://console.groq.com |
+| **How** | 1. Go to https://console.groq.com 2. Sign up with Google or email (free) 3. Click **API Keys** in the left sidebar 4. Click **Create API Key** 5. Copy the key (starts with `gsk_...`) 6. Paste into `backend/.env`: `GROQ_API_KEY=gsk_your_key_here` |
 
-**How to get it**:
-1. Go to https://console.groq.com
-2. Sign up with Google or email (free)
-3. Click **API Keys** in the left sidebar
-4. Click **Create API Key**
-5. Copy the key (starts with `gsk_...`)
-
-**Add to `.env`**:
-```
-GROQ_API_KEY=gsk_your_key_here
-```
-**Free tier**: 14,400 requests/day, 6,000 tokens/min
+**Free tier**: 14,400 requests/day, 6,000 tokens/min. More than enough for daily use.
 
 ---
 
-### 2. NewsAPI Key (Optional - FREE)
+### 2. NEWSAPI_KEY (Optional - FREE)
 
-**What it does**: Fetches news articles from 80,000+ sources worldwide.
+| Question | Answer |
+|----------|--------|
+| **What** | API key for NewsAPI.org, a news aggregation service that indexes 80,000+ sources worldwide. |
+| **Why** | Adds more news sources beyond RSS feeds. Provides structured article data (title, description, author, source) for better fact verification. RSS feeds already work without this, so it's optional. |
+| **When** | Used when you click "Aggregate News" on the dashboard. The app first tries RSS feeds, then NewsAPI if configured, then GNews. |
+| **Where** | Get it from https://newsapi.org/register |
+| **How** | 1. Go to https://newsapi.org/register 2. Sign up with email 3. Your API key appears on the dashboard immediately 4. Copy the key 5. Paste into `backend/.env`: `NEWSAPI_KEY=your_key_here` |
 
-**How to get it**:
-1. Go to https://newsapi.org/register
-2. Sign up with email
-3. Your API key will be shown on the dashboard
-4. Copy the key
-
-**Add to `.env`**:
-```
-NEWSAPI_KEY=your_key_here
-```
-**Free tier**: 100 requests/day (works for development). Note: RSS feeds already provide news without this key.
+**Free tier**: 100 requests/day. Each "Aggregate News" click = 1 request.
 
 ---
 
-### 3. GNews API Key (Optional - FREE)
+### 3. GNEWS_API_KEY (Optional - FREE)
 
-**What it does**: Backup news source with Google News data.
+| Question | Answer |
+|----------|--------|
+| **What** | API key for GNews.io, a Google News-powered article search API. |
+| **Why** | Acts as a backup/additional news source. If NewsAPI is exhausted or unavailable, GNews provides articles from Google News index. Helps reach the target of 10-15 sources per topic. |
+| **When** | Used during news aggregation as a fallback source. Only called if enabled in `.env`. |
+| **Where** | Get it from https://gnews.io/register |
+| **How** | 1. Go to https://gnews.io/register 2. Sign up with email 3. Go to Dashboard > API Key 4. Copy the key 5. Paste into `backend/.env`: `GNEWS_API_KEY=your_key_here` |
 
-**How to get it**:
-1. Go to https://gnews.io/register
-2. Sign up with email
-3. Go to Dashboard > API Key
-4. Copy the key
-
-**Add to `.env`**:
-```
-GNEWS_API_KEY=your_key_here
-```
-**Free tier**: 100 requests/day
+**Free tier**: 100 requests/day.
 
 ---
 
-### 4. Pexels API Key (Optional - FREE)
+### 4. PEXELS_API_KEY (Optional - FREE)
 
-**What it does**: Provides stock images and videos for video backgrounds.
+| Question | Answer |
+|----------|--------|
+| **What** | API key for Pexels.com, a free stock photo and video library. |
+| **Why** | Provides background images and stock footage for the generated news videos. Without it, videos use solid-color backgrounds. With it, the video engine searches for topic-relevant images automatically. |
+| **When** | Used during the "Generate Video" step. The video assembly engine searches Pexels for images matching each script segment. |
+| **Where** | Get it from https://www.pexels.com/api/ |
+| **How** | 1. Go to https://www.pexels.com/api/ 2. Click **Get Started** and create an account 3. After login, go to https://www.pexels.com/api/new/ 4. Fill in app name (e.g. "NewsAI Studio") and description 5. Your API key will be displayed 6. Paste into `backend/.env`: `PEXELS_API_KEY=your_key_here` |
 
-**How to get it**:
-1. Go to https://www.pexels.com/api/
-2. Click **Get Started** and create an account
-3. After login, go to https://www.pexels.com/api/new/
-4. Fill in the form (app name, description)
-5. Your API key will be displayed
-
-**Add to `.env`**:
-```
-PEXELS_API_KEY=your_key_here
-```
-**Free tier**: 200 requests/hour, 20,000 requests/month
+**Free tier**: 200 requests/hour, 20,000 requests/month. Very generous.
 
 ---
 
-### 5. Google OAuth (Optional - For Google Login)
+### 5. GOOGLE_CLIENT_ID & GOOGLE_CLIENT_SECRET (Optional - FREE)
 
-**What it does**: Allows users to log in with their Google account.
+| Question | Answer |
+|----------|--------|
+| **What** | OAuth 2.0 credentials from Google Cloud Console. Used for "Sign in with Google" button. |
+| **Why** | Lets users log in with their Google account instead of email/password. Convenient for users who don't want to create a new account. The app works fine with email/password login without this. |
+| **When** | Only needed if you want Google login on the login page. Not required for any other feature. |
+| **Where** | Get from https://console.cloud.google.com/ > APIs & Services > Credentials |
+| **How** | 1. Go to https://console.cloud.google.com/ 2. Create a new project (or select existing) 3. Go to **APIs & Services** > **Credentials** 4. Click **Create Credentials** > **OAuth 2.0 Client IDs** 5. Set Application type: **Web application** 6. Add Authorized redirect URI: `http://localhost:8000/api/auth/google-oauth/callback` 7. Copy the **Client ID** and **Client Secret** 8. Paste into `backend/.env`: `GOOGLE_CLIENT_ID=your_id` and `GOOGLE_CLIENT_SECRET=your_secret` |
 
-**How to get it**:
-1. Go to https://console.cloud.google.com/
-2. Create a new project (or select existing)
-3. Go to **APIs & Services** > **Credentials**
-4. Click **Create Credentials** > **OAuth 2.0 Client IDs**
-5. Set Application type: **Web application**
-6. Add Authorized redirect URI: `http://localhost:8000/api/auth/google-oauth/callback`
-7. Copy the **Client ID** and **Client Secret**
-
-**Add to `.env`**:
-```
-GOOGLE_CLIENT_ID=your_client_id_here
-GOOGLE_CLIENT_SECRET=your_client_secret_here
-GOOGLE_REDIRECT_URI=http://localhost:8000/api/auth/google-oauth/callback
-```
+**Free**: No cost. Google OAuth is free for any number of users.
 
 ---
 
-### 6. YouTube API (Optional - For Video Upload)
+### 6. YOUTUBE_CLIENT_ID & YOUTUBE_CLIENT_SECRET (Optional - FREE)
 
-**What it does**: Upload generated videos directly to your YouTube channel.
+| Question | Answer |
+|----------|--------|
+| **What** | OAuth 2.0 credentials for YouTube Data API v3. Enables direct video upload to YouTube from the app. |
+| **Why** | Lets you upload generated videos to your YouTube channel directly from the dashboard with auto-generated title, description, tags, and thumbnail. Without it, you can still download the MP4 and upload manually. |
+| **When** | Used when you click "Upload to YouTube" on a completed video. Also used for the initial YouTube channel connection in Settings. |
+| **Where** | Get from https://console.cloud.google.com/ > APIs & Services |
+| **How** | 1. Go to https://console.cloud.google.com/ 2. Select your project (or create one) 3. Go to **APIs & Services** > **Library** 4. Search for **YouTube Data API v3** and click **Enable** 5. Go to **APIs & Services** > **Credentials** 6. Click **Create Credentials** > **OAuth 2.0 Client IDs** 7. Set Application type: **Web application** 8. Add Authorized redirect URI: `http://localhost:8000/api/youtube/callback` 9. Copy the **Client ID** and **Client Secret** 10. Paste into `backend/.env`: `YOUTUBE_CLIENT_ID=your_id` and `YOUTUBE_CLIENT_SECRET=your_secret` |
 
-**How to get it**:
-1. Go to https://console.cloud.google.com/
-2. Select your project (or create one)
-3. Go to **APIs & Services** > **Library**
-4. Search for **YouTube Data API v3** and click **Enable**
-5. Go to **APIs & Services** > **Credentials**
-6. Click **Create Credentials** > **OAuth 2.0 Client IDs**
-7. Set Application type: **Web application**
-8. Add Authorized redirect URI: `http://localhost:8000/api/youtube/callback`
-9. Copy the **Client ID** and **Client Secret**
-
-**Add to `.env`**:
-```
-YOUTUBE_CLIENT_ID=your_client_id_here
-YOUTUBE_CLIENT_SECRET=your_client_secret_here
-YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback
-```
-**Free tier**: 10,000 quota units/day (1 upload = ~1,600 units, so ~6 uploads/day)
+**Free tier**: 10,000 quota units/day (1 upload = ~1,600 units, so ~6 uploads/day).
 
 ---
 
-### 7. ElevenLabs API Key (Optional - PAID)
+### 7. ELEVENLABS_API_KEY (Optional - PAID)
 
-**What it does**: Premium voice cloning with high-quality AI voices (alternative to free Edge TTS).
+| Question | Answer |
+|----------|--------|
+| **What** | API key for ElevenLabs, a premium AI voice synthesis and voice cloning platform. |
+| **Why** | Provides higher-quality voice cloning than the free Edge TTS. If you want your generated videos to sound like a specific person with high fidelity, ElevenLabs is the premium option. The app defaults to Edge TTS (free, good quality) without this key. |
+| **When** | Used during voiceover generation only if configured. The app checks: if ElevenLabs key exists, use it; otherwise, use free Edge TTS. |
+| **Where** | Get from https://elevenlabs.io/ |
+| **How** | 1. Go to https://elevenlabs.io/ 2. Sign up for an account 3. Go to Profile (bottom-left) > API Keys 4. Copy the API key 5. Paste into `backend/.env`: `ELEVENLABS_API_KEY=your_key_here` |
 
-**How to get it**:
-1. Go to https://elevenlabs.io/
-2. Sign up for an account
-3. Go to Profile > API Keys
-4. Copy the API key
-
-**Add to `.env`**:
-```
-ELEVENLABS_API_KEY=your_key_here
-```
-**Free tier**: Limited characters/month. Paid plans start at $5/month.
+**Free tier**: ~10,000 characters/month. Paid plans start at $5/month for 30,000 characters.
 
 ---
 
-### 8. D-ID API Key (Optional - PAID)
+### 8. DID_API_KEY (Optional - PAID)
 
-**What it does**: Cloud-based avatar/talking-head generation (alternative to local SadTalker).
+| Question | Answer |
+|----------|--------|
+| **What** | API key for D-ID, a cloud-based talking-head avatar generation service. |
+| **Why** | Creates realistic talking-head avatar videos from a single photo + audio. Alternative to the local SadTalker (which requires GPU). Without either, the app generates videos without an avatar overlay. |
+| **When** | Used during avatar video generation only if configured and `GPU_ENABLED=false`. If you have a GPU, the app uses free SadTalker instead. |
+| **Where** | Get from https://www.d-id.com/ |
+| **How** | 1. Go to https://www.d-id.com/ 2. Sign up for an account 3. Go to Settings > API Keys 4. Generate and copy the key 5. Paste into `backend/.env`: `DID_API_KEY=your_key_here` |
 
-**How to get it**:
-1. Go to https://www.d-id.com/
-2. Sign up for an account
-3. Go to Settings > API Keys
-4. Generate and copy the key
-
-**Add to `.env`**:
-```
-DID_API_KEY=your_key_here
-```
-**Free tier**: 20 videos free, then paid.
+**Free tier**: 20 videos free, then paid plans start at $5.90/month.
 
 ---
 

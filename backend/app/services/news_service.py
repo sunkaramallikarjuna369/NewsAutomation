@@ -114,6 +114,40 @@ class NewsService:
                 articles.extend(result)
         return articles
 
+    async def fetch_daily_headlines(self) -> List[Dict[str, Any]]:
+        articles: List[Dict[str, Any]] = []
+        try:
+            async with httpx.AsyncClient(timeout=10.0) as client:
+                for name, url in list(RSS_FEEDS.items())[:5]:
+                    try:
+                        resp = await client.get(url)
+                        if resp.status_code != 200:
+                            continue
+                        feed = feedparser.parse(resp.text)
+                        for entry in feed.entries[:3]:
+                            title = getattr(entry, "title", "")
+                            summary = getattr(entry, "summary", getattr(entry, "description", ""))
+                            articles.append({
+                                "source": name,
+                                "title": title,
+                                "summary": (summary[:200] + "...") if len(summary) > 200 else summary,
+                                "url": getattr(entry, "link", ""),
+                                "published_date": getattr(entry, "published", None),
+                            })
+                    except Exception as e:
+                        logger.warning(f"Daily headlines RSS error for {name}: {e}")
+                        continue
+        except Exception as e:
+            logger.warning(f"Daily headlines error: {e}")
+        seen_titles: set = set()
+        unique: List[Dict[str, Any]] = []
+        for a in articles:
+            t = a.get("title", "").lower().strip()
+            if t and t not in seen_titles:
+                seen_titles.add(t)
+                unique.append(a)
+        return unique[:15]
+
     async def _fetch_newsapi(self, topic: str) -> List[Dict[str, Any]]:
         if not self.newsapi_key:
             return []

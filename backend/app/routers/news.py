@@ -116,3 +116,15 @@ async def get_trending():
             "Education Policy Reform",
         ]
     }
+
+
+@router.get("/daily")
+async def get_daily_news(
+    current_user: User = Depends(get_current_user),
+):
+    service = NewsService(
+        newsapi_key=current_user.newsapi_key,
+        gnews_key=current_user.gnews_api_key,
+    )
+    articles = await service.fetch_daily_headlines()
+    return {"articles": articles}

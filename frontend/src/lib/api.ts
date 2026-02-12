@@ -44,6 +44,7 @@ export const newsApi = {
   verify: (data: { aggregation_id: number }) =>
     api.post("/api/news/verify", data),
   trending: () => api.get("/api/news/trending"),
+  daily: () => api.get("/api/news/daily"),
 };
 
 export const scriptApi = {

@@ -16,82 +16,260 @@ import {
   X,
 } from "lucide-react";
 
-const API_KEY_HELP: Record<string, { title: string; steps: string[]; url: string; free: string }> = {
+interface HelpStep {
+  text: string;
+  detail?: string;
+  substeps?: string[];
+}
+
+interface ApiKeyHelpInfo {
+  title: string;
+  what: string;
+  why: string;
+  steps: HelpStep[];
+  url: string;
+  free: string;
+  tip?: string;
+}
+
+const API_KEY_HELP: Record<string, ApiKeyHelpInfo> = {
   groq: {
     title: "How to get your Groq API Key",
+    what: "Groq provides ultra-fast AI language models (like Llama 3.1 70B) that power script generation and fact verification in this app.",
+    why: "Required for AI features. Without this key, you cannot generate news scripts or verify facts.",
     steps: [
-      "Go to console.groq.com",
-      "Sign up with Google or email (free)",
-      "Click 'API Keys' in the left sidebar",
-      "Click 'Create API Key'",
-      "Copy the key (starts with gsk_...)",
-      "Paste it in the field below",
+      {
+        text: "Open your browser and go to console.groq.com",
+        detail: "This is the Groq developer console where you manage your API access.",
+      },
+      {
+        text: "Create a free account",
+        substeps: [
+          "Click 'Sign Up' on the top-right corner",
+          "You can sign up with Google, GitHub, or email",
+          "Verify your email if required",
+          "You will be taken to the Groq dashboard",
+        ],
+      },
+      {
+        text: "Navigate to API Keys",
+        substeps: [
+          "Look at the left sidebar menu",
+          "Click on 'API Keys'",
+          "You will see a list of your existing keys (empty if new account)",
+        ],
+      },
+      {
+        text: "Create a new API key",
+        substeps: [
+          "Click the 'Create API Key' button",
+          "Give it a name like 'NewsAI Studio'",
+          "Click 'Submit' or 'Create'",
+        ],
+      },
+      {
+        text: "Copy the API key",
+        detail: "IMPORTANT: The key will only be shown ONCE. It starts with 'gsk_'. Copy it immediately and save it somewhere safe.",
+      },
+      {
+        text: "Paste the key in the field below and click 'Save Settings'",
+      },
     ],
     url: "https://console.groq.com",
     free: "Free tier: 14,400 requests/day, 6,000 tokens/min",
+    tip: "The free tier is very generous. You likely won't need to upgrade unless you process hundreds of videos per day.",
   },
   newsapi: {
     title: "How to get your NewsAPI Key",
+    what: "NewsAPI aggregates headlines and articles from 80,000+ news sources worldwide. It adds more sources beyond RSS feeds.",
+    why: "Optional. The app already fetches news from RSS feeds for free. NewsAPI adds additional sources like CNN, BBC, etc.",
     steps: [
-      "Go to newsapi.org/register",
-      "Sign up with your email",
-      "Your API key appears on the dashboard immediately",
-      "Copy the key",
-      "Paste it in the field below",
+      {
+        text: "Open your browser and go to newsapi.org",
+      },
+      {
+        text: "Click 'Get API Key' (top-right) or go directly to newsapi.org/register",
+      },
+      {
+        text: "Fill in the registration form",
+        substeps: [
+          "Enter your First Name and Last Name",
+          "Enter your Email Address",
+          "Enter a Password",
+          "Select 'Individual' as account type",
+          "Check 'I agree to the terms'",
+          "Click 'Submit'",
+        ],
+      },
+      {
+        text: "Find your API key",
+        detail: "After registration, your API key is shown immediately on the dashboard. It is also sent to your email.",
+      },
+      {
+        text: "Copy the API key and paste it in the field below",
+      },
     ],
     url: "https://newsapi.org/register",
-    free: "Free tier: 100 requests/day",
+    free: "Free tier: 100 requests/day (developer plan)",
+    tip: "100 requests/day is enough for ~50 news topics. The app caches results, so repeated searches for the same topic don't count.",
   },
   gnews: {
     title: "How to get your GNews API Key",
+    what: "GNews is a backup news aggregation API. It provides news articles from Google News in a structured format.",
+    why: "Optional backup source. Useful when NewsAPI quota is exhausted or for additional coverage.",
     steps: [
-      "Go to gnews.io/register",
-      "Sign up with your email",
-      "Go to Dashboard > API Key",
-      "Copy the key",
-      "Paste it in the field below",
+      {
+        text: "Open your browser and go to gnews.io",
+      },
+      {
+        text: "Click 'Register' or go to gnews.io/register",
+      },
+      {
+        text: "Fill in the registration form",
+        substeps: [
+          "Enter your Email",
+          "Enter a Password and confirm it",
+          "Click 'Register'",
+          "Check your email for a verification link and click it",
+        ],
+      },
+      {
+        text: "Get your API key from the dashboard",
+        substeps: [
+          "After verifying your email, log in at gnews.io",
+          "Go to 'Dashboard' from the top menu",
+          "Your API key is displayed on the dashboard page",
+          "Click the copy icon next to it",
+        ],
+      },
+      {
+        text: "Paste the key in the field below",
+      },
     ],
     url: "https://gnews.io/register",
     free: "Free tier: 100 requests/day",
+    tip: "You only need this if you also have NewsAPI. Together they give you 200 API requests/day plus unlimited RSS feeds.",
   },
   pexels: {
     title: "How to get your Pexels API Key",
+    what: "Pexels provides free, high-quality stock photos. The app uses them as background images in your generated news videos.",
+    why: "Optional. Without this, videos will use solid color backgrounds. With Pexels, videos get professional stock image backgrounds.",
     steps: [
-      "Go to pexels.com/api",
-      "Click 'Get Started' and create an account",
-      "After login, go to pexels.com/api/new",
-      "Fill in app name (e.g. 'NewsAI Studio') and description",
-      "Your API key will be displayed",
-      "Copy and paste it in the field below",
+      {
+        text: "Open your browser and go to pexels.com",
+      },
+      {
+        text: "Create an account",
+        substeps: [
+          "Click 'Join' (top-right corner)",
+          "Sign up with Google, Facebook, Apple, or Email",
+          "If using email: enter your name, email, and password",
+          "Verify your email if required",
+        ],
+      },
+      {
+        text: "Go to the API page",
+        substeps: [
+          "Once logged in, go to pexels.com/api",
+          "Or click your profile icon > 'Image & Video API'",
+        ],
+      },
+      {
+        text: "Request API access",
+        substeps: [
+          "Click 'Your API Key' or 'Get Started'",
+          "If asked, fill in a description: e.g. 'NewsAI Studio - automated news video platform'",
+          "Agree to the terms of service",
+          "Click 'Generate API Key'",
+        ],
+      },
+      {
+        text: "Copy the API key shown and paste it in the field below",
+      },
     ],
     url: "https://www.pexels.com/api/",
     free: "Free tier: 200 requests/hour, 20,000/month",
+    tip: "Very generous limits. One video typically needs 5-10 image requests, so 20,000/month supports thousands of videos.",
   },
   elevenlabs: {
     title: "How to get your ElevenLabs API Key",
+    what: "ElevenLabs provides premium AI voice cloning with extremely natural-sounding voices. Higher quality than the default Edge TTS.",
+    why: "Optional premium upgrade. The app uses free Edge TTS by default, which already sounds good. ElevenLabs is for professional-grade voice quality.",
     steps: [
-      "Go to elevenlabs.io",
-      "Sign up for an account",
-      "Click your profile icon (bottom-left)",
-      "Go to 'API Keys'",
-      "Copy the API key",
-      "Paste it in the field below",
+      {
+        text: "Open your browser and go to elevenlabs.io",
+      },
+      {
+        text: "Create an account",
+        substeps: [
+          "Click 'Sign Up' (top-right)",
+          "Sign up with Google or email",
+          "Verify your email if required",
+        ],
+      },
+      {
+        text: "Navigate to your API key",
+        substeps: [
+          "After logging in, you'll see the ElevenLabs workspace",
+          "Click your profile icon or initials in the bottom-left corner",
+          "Click 'Profile + API key' from the menu",
+        ],
+      },
+      {
+        text: "Copy the API key",
+        substeps: [
+          "You will see your API key (partially hidden with dots)",
+          "Click the eye icon to reveal it, or click the copy icon",
+          "The key looks like a long string of letters and numbers",
+        ],
+      },
+      {
+        text: "Paste the key in the field below and click 'Save Settings'",
+      },
     ],
     url: "https://elevenlabs.io",
-    free: "Free tier: ~10,000 characters/month. Paid from $5/month.",
+    free: "Free tier: ~10,000 characters/month (~10 minutes of audio). Paid from $5/month.",
+    tip: "Try the free Edge TTS first (it's the default, no key needed). Only get ElevenLabs if you want premium voice cloning quality.",
   },
   did: {
     title: "How to get your D-ID API Key",
+    what: "D-ID creates AI-powered talking head videos from a photo. It animates a still photo to look like the person is speaking.",
+    why: "Optional. The app can use SadTalker (free, local GPU) by default, or generate videos without an avatar. D-ID is a cloud alternative.",
     steps: [
-      "Go to d-id.com",
-      "Sign up for an account",
-      "Go to Settings > API Keys",
-      "Generate a new API key",
-      "Copy the key",
-      "Paste it in the field below",
+      {
+        text: "Open your browser and go to studio.d-id.com",
+      },
+      {
+        text: "Create an account",
+        substeps: [
+          "Click 'Sign Up' or 'Get Started Free'",
+          "Sign up with Google, Apple, or email",
+          "Verify your email if required",
+        ],
+      },
+      {
+        text: "Navigate to API Keys",
+        substeps: [
+          "After logging in, click your profile icon (top-right)",
+          "Click 'Settings' from the dropdown",
+          "In Settings, find the 'API Keys' section",
+        ],
+      },
+      {
+        text: "Generate a new API key",
+        substeps: [
+          "Click 'Generate API Key' or 'Create Key'",
+          "The key will be displayed (shown only once)",
+          "Copy it immediately and save it somewhere safe",
+        ],
+      },
+      {
+        text: "Paste the key in the field below and click 'Save Settings'",
+      },
     ],
-    url: "https://www.d-id.com",
-    free: "Free tier: 20 videos free, then paid from $5.90/month",
+    url: "https://studio.d-id.com",
+    free: "Free tier: 20 videos free (5 min total), then from $5.90/month",
+    tip: "If you have a GPU, SadTalker (free, unlimited) is used by default. D-ID is only needed for cloud-based avatar generation without a GPU.",
   },
 };
 
@@ -288,7 +466,7 @@ export default function Settings() {
         {showYtHelp && (
           <div className="mb-4 p-4 bg-gray-800 border border-cyan-500/30 rounded-lg text-sm">
             <div className="flex items-center justify-between mb-3">
-              <span className="font-medium text-cyan-400">How to set up YouTube API & connect your channel</span>
+              <span className="font-medium text-cyan-400 text-base">How to set up YouTube API & connect your channel</span>
               <button
                 type="button"
                 onClick={() => setShowYtHelp(false)}
@@ -298,64 +476,131 @@ export default function Settings() {
               </button>
             </div>
 
-            <div className="space-y-3">
-              <div>
-                <p className="font-medium text-white mb-1">Step 1: Create a Google Cloud Project</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
-                  <li>Go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">console.cloud.google.com</a></li>
-                  <li>Sign in with your Google account</li>
-                  <li>Click "Select a project" at the top, then "New Project"</li>
-                  <li>Name it (e.g. "NewsAI Studio") and click "Create"</li>
+            <div className="mb-3 p-2 bg-gray-700/50 rounded text-gray-300">
+              <p><strong className="text-white">What:</strong> YouTube Data API v3 lets this app upload videos directly to your YouTube channel.</p>
+              <p className="mt-1"><strong className="text-white">Why:</strong> Required only if you want to publish videos to YouTube from the dashboard. You can still generate videos without this.</p>
+              <p className="mt-1"><strong className="text-amber-400">Note:</strong> This is the most complex setup because it involves Google Cloud Console. Follow each step carefully.</p>
+            </div>
+
+            <div className="space-y-4">
+              <div className="border-l-2 border-cyan-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 1: Create a Google Cloud Project</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>Open your browser and go to <a href="https://console.cloud.google.com" target="_blank" rel="noopener noreferrer" className="text-cyan-400 hover:underline">console.cloud.google.com</a></li>
+                  <li>Sign in with the <strong>same Google account</strong> you use for YouTube</li>
+                  <li>At the very top of the page, you will see a blue bar. Look for a dropdown that says "Select a project" (or shows a project name)</li>
+                  <li>Click that dropdown &rarr; A popup will appear</li>
+                  <li>Click <strong>"New Project"</strong> (top-right of the popup)</li>
+                  <li>In the "Project name" field, type: <code className="bg-gray-700 px-1 rounded">NewsAI Studio</code></li>
+                  <li>Leave "Organization" and "Location" as default</li>
+                  <li>Click <strong>"Create"</strong></li>
+                  <li>Wait a few seconds. A notification bell will show "Project created". Click <strong>"Select Project"</strong> to switch to it</li>
                 </ol>
               </div>
 
-              <div>
-                <p className="font-medium text-white mb-1">Step 2: Enable YouTube Data API v3</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
-                  <li>In Google Cloud Console, go to "APIs & Services" &gt; "Library"</li>
-                  <li>Search for "YouTube Data API v3"</li>
-                  <li>Click on it and press "Enable"</li>
+              <div className="border-l-2 border-cyan-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 2: Enable the YouTube Data API v3</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>Make sure your new project is selected (check the dropdown at the top)</li>
+                  <li>In the left sidebar, click the hamburger menu (three horizontal lines, top-left) if the sidebar is hidden</li>
+                  <li>Navigate to: <strong>"APIs & Services"</strong> &rarr; <strong>"Library"</strong></li>
+                  <li>In the search bar, type: <code className="bg-gray-700 px-1 rounded">YouTube Data API v3</code></li>
+                  <li>Click on <strong>"YouTube Data API v3"</strong> from the results (it has a red YouTube icon)</li>
+                  <li>Click the big blue <strong>"Enable"</strong> button</li>
+                  <li>Wait a few seconds until you see the API dashboard. The status should show "Enabled"</li>
                 </ol>
               </div>
 
-              <div>
-                <p className="font-medium text-white mb-1">Step 3: Create OAuth 2.0 Credentials</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
-                  <li>Go to "APIs & Services" &gt; "Credentials"</li>
-                  <li>Click "+ Create Credentials" &gt; "OAuth client ID"</li>
-                  <li>If prompted, configure the OAuth consent screen first:
-                    <ul className="list-disc list-inside ml-4 text-gray-400">
-                      <li>Choose "External" user type</li>
-                      <li>Fill in app name, support email, and developer email</li>
-                      <li>Add scope: "youtube.upload"</li>
-                      <li>Add your email as a test user</li>
+              <div className="border-l-2 border-amber-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 3: Configure the OAuth Consent Screen</p>
+                <p className="text-gray-400 text-xs mb-2">This tells Google what your app is and who can use it. You must do this before creating credentials.</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>In the left sidebar, go to <strong>"APIs & Services"</strong> &rarr; <strong>"OAuth consent screen"</strong></li>
+                  <li>Select <strong>"External"</strong> as user type (the only option for personal accounts)</li>
+                  <li>Click <strong>"Create"</strong></li>
+                  <li>Fill in the required fields:
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-gray-400">
+                      <li><strong>App name:</strong> <code className="bg-gray-700 px-1 rounded">NewsAI Studio</code></li>
+                      <li><strong>User support email:</strong> Select your email from the dropdown</li>
+                      <li><strong>Developer contact email:</strong> Type your email address</li>
+                      <li>Leave all other fields blank/default</li>
                     </ul>
                   </li>
-                  <li>Back in Credentials, select "Web application" as type</li>
-                  <li>Add authorized redirect URI: <code className="bg-gray-700 px-1 rounded">http://localhost:8000/api/youtube/callback</code></li>
-                  <li>Click "Create"</li>
-                </ol>
-              </div>
-
-              <div>
-                <p className="font-medium text-white mb-1">Step 4: Copy your credentials</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
-                  <li>Copy the <strong>Client ID</strong> and <strong>Client Secret</strong> shown</li>
-                  <li>Add them to your <code className="bg-gray-700 px-1 rounded">backend/.env</code> file:
-                    <pre className="bg-gray-700 p-2 rounded mt-1 text-xs overflow-x-auto">YOUTUBE_CLIENT_ID=your-client-id-here{"\n"}YOUTUBE_CLIENT_SECRET=your-client-secret-here{"\n"}YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback</pre>
+                  <li>Click <strong>"Save and Continue"</strong></li>
+                  <li>On the "Scopes" page: Click <strong>"Add or Remove Scopes"</strong>
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-gray-400">
+                      <li>In the search/filter box, type <code className="bg-gray-700 px-1 rounded">youtube.upload</code></li>
+                      <li>Check the box next to <code className="bg-gray-700 px-1 rounded">.../auth/youtube.upload</code></li>
+                      <li>Also search for and add <code className="bg-gray-700 px-1 rounded">youtube.readonly</code></li>
+                      <li>Click <strong>"Update"</strong> at the bottom</li>
+                    </ul>
                   </li>
-                  <li>Restart your backend server</li>
+                  <li>Click <strong>"Save and Continue"</strong></li>
+                  <li>On the "Test users" page: Click <strong>"+ Add Users"</strong>
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-gray-400">
+                      <li>Enter your own Gmail/Google email address</li>
+                      <li>Click <strong>"Add"</strong></li>
+                      <li>This is required because the app will be in "Testing" mode</li>
+                    </ul>
+                  </li>
+                  <li>Click <strong>"Save and Continue"</strong>, then <strong>"Back to Dashboard"</strong></li>
                 </ol>
               </div>
 
-              <div>
-                <p className="font-medium text-white mb-1">Step 5: Connect from this page</p>
-                <ol className="list-decimal list-inside space-y-0.5 text-gray-300 ml-2">
-                  <li>Click the "Connect YouTube" button below</li>
-                  <li>Sign in with the Google account that owns your YouTube channel</li>
-                  <li>Grant permission to upload videos</li>
-                  <li>You'll be redirected back and the status will show "Connected"</li>
+              <div className="border-l-2 border-cyan-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 4: Create OAuth 2.0 Client Credentials</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>In the left sidebar, go to <strong>"APIs & Services"</strong> &rarr; <strong>"Credentials"</strong></li>
+                  <li>Click <strong>"+ Create Credentials"</strong> (top of the page)</li>
+                  <li>Select <strong>"OAuth client ID"</strong> from the dropdown</li>
+                  <li>For "Application type", select <strong>"Web application"</strong></li>
+                  <li>Name it: <code className="bg-gray-700 px-1 rounded">NewsAI Studio Web Client</code></li>
+                  <li>Under <strong>"Authorized redirect URIs"</strong>:
+                    <ul className="list-disc list-inside ml-4 mt-1 space-y-1 text-gray-400">
+                      <li>Click <strong>"+ Add URI"</strong></li>
+                      <li>Enter exactly: <code className="bg-gray-700 px-1 rounded">http://localhost:8000/api/youtube/callback</code></li>
+                    </ul>
+                  </li>
+                  <li>Click <strong>"Create"</strong></li>
+                  <li>A popup will show your <strong>Client ID</strong> and <strong>Client Secret</strong></li>
+                  <li><span className="text-amber-400">IMPORTANT:</span> Copy BOTH values immediately. You can also click "Download JSON" to save them</li>
                 </ol>
+              </div>
+
+              <div className="border-l-2 border-green-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 5: Add credentials to your .env file</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>Open the file <code className="bg-gray-700 px-1 rounded">backend/.env</code> in a text editor (Notepad, VS Code, etc.)</li>
+                  <li>Find or add these three lines and replace with your actual values:
+                    <pre className="bg-gray-700 p-2 rounded mt-1 text-xs overflow-x-auto leading-relaxed">YOUTUBE_CLIENT_ID=paste-your-client-id-here{"\n"}YOUTUBE_CLIENT_SECRET=paste-your-client-secret-here{"\n"}YOUTUBE_REDIRECT_URI=http://localhost:8000/api/youtube/callback</pre>
+                  </li>
+                  <li>Save the file</li>
+                  <li>Restart your backend server (stop it with Ctrl+C, then run <code className="bg-gray-700 px-1 rounded">uvicorn app.main:app --reload --port 8000</code> again)</li>
+                </ol>
+              </div>
+
+              <div className="border-l-2 border-green-500 pl-3">
+                <p className="font-medium text-white mb-2">Step 6: Connect your YouTube channel</p>
+                <ol className="list-decimal list-inside space-y-1.5 text-gray-300 ml-1">
+                  <li>Come back to this Settings page in the browser</li>
+                  <li>Click the red <strong>"Connect YouTube"</strong> button below</li>
+                  <li>A Google sign-in window will open</li>
+                  <li>Sign in with the <strong>same Google account</strong> you added as a test user in Step 3</li>
+                  <li>You may see a warning: "This app isn't verified" &mdash; click <strong>"Continue"</strong> (this is normal for test mode)</li>
+                  <li>Grant all requested permissions (upload videos, manage your YouTube account)</li>
+                  <li>You will be redirected back to this page</li>
+                  <li>The status should now show a green checkmark: <strong>"YouTube channel connected"</strong></li>
+                </ol>
+              </div>
+
+              <div className="mt-3 p-2 bg-gray-700/50 rounded">
+                <p className="text-amber-400 font-medium text-xs mb-1">Troubleshooting:</p>
+                <ul className="list-disc list-inside text-gray-400 text-xs space-y-1">
+                  <li>"Error 401" or "Access Denied": Make sure you added your email as a test user in Step 3</li>
+                  <li>"Redirect URI mismatch": The URI in Google Cloud must exactly match <code className="bg-gray-700 px-1 rounded">http://localhost:8000/api/youtube/callback</code></li>
+                  <li>"API not enabled": Go back to Step 2 and make sure YouTube Data API v3 is enabled</li>
+                  <li>Backend error: Make sure the .env file is saved and the backend server was restarted after editing</li>
+                </ul>
               </div>
 
               <div className="mt-2 flex items-center justify-between pt-2 border-t border-gray-700">
@@ -368,7 +613,7 @@ export default function Settings() {
                   <ExternalLink className="h-3 w-3" />
                   Open Google Cloud Console
                 </a>
-                <span className="text-xs text-gray-500">Free: 10,000 quota units/day</span>
+                <span className="text-xs text-gray-500">Free: 10,000 quota units/day (~50 uploads)</span>
               </div>
             </div>
           </div>
@@ -518,12 +763,40 @@ function ApiKeyInput({
               <X className="h-4 w-4" />
             </button>
           </div>
-          <ol className="list-decimal list-inside space-y-1 text-gray-300">
+
+          <div className="mb-3 p-2 bg-gray-700/50 rounded text-gray-300 text-xs">
+            <p><strong className="text-white">What:</strong> {help.what}</p>
+            <p className="mt-1"><strong className="text-white">Why:</strong> {help.why}</p>
+          </div>
+
+          <div className="space-y-3">
             {help.steps.map((step, i) => (
-              <li key={i}>{step}</li>
+              <div key={i} className="border-l-2 border-cyan-500/50 pl-2">
+                <p className="text-gray-200">
+                  <span className="text-cyan-400 font-medium">Step {i + 1}:</span> {step.text}
+                </p>
+                {step.detail && (
+                  <p className="text-gray-400 text-xs mt-0.5 ml-1">{step.detail}</p>
+                )}
+                {step.substeps && (
+                  <ul className="list-disc list-inside ml-4 mt-1 space-y-0.5 text-gray-400 text-xs">
+                    {step.substeps.map((sub, j) => (
+                      <li key={j}>{sub}</li>
+                    ))}
+                  </ul>
+                )}
+              </div>
             ))}
-          </ol>
-          <div className="mt-2 flex items-center justify-between">
+          </div>
+
+          {help.tip && (
+            <div className="mt-3 p-2 bg-gray-700/50 rounded text-xs">
+              <span className="text-amber-400 font-medium">Tip:</span>{" "}
+              <span className="text-gray-300">{help.tip}</span>
+            </div>
+          )}
+
+          <div className="mt-3 flex items-center justify-between pt-2 border-t border-gray-700">
             <a
               href={help.url}
               target="_blank"
